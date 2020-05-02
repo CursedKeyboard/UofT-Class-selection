@@ -172,10 +172,10 @@ def count_credits(course_list: List[str]) -> int:
 
 
 if __name__ == '__main__':
-    #TODO add functionality for 3 and even 4 different programs
     user_program_choice = input('How many different programs would you like to take at the same time? (2)')
 
-    if int(user_program_choice) != 2:
+    if int(user_program_choice) < 2 or int(user_program_choice) >= 5:
+        print('You must choose between 2 and 4 programs (inclusive)')
         raise ValueError
 
     program_list = list()
@@ -185,16 +185,13 @@ if __name__ == '__main__':
         print('='*40)
 
     print('These are the courses which are similar between programs')
-    # if int(user_program_choice) == 3:
-    #     common_courses = (program_list[0][0]&program_list[1][0])&(program_list[0][0]&program_list[2][0])
-    # else:
-    common_courses = program_list[0][0]&program_list[1][0]
+    unique_courses = set()
+    for program_stats in program_list:
+        for course in program_stats[0]:
+            unique_courses.add(course)
 
-    print(common_courses)
-    shared_credit_count = count_credits(common_courses)
-    print('These programs share {0} credits'.format(shared_credit_count))
+    final_credit_count = count_credits(list(common_courses))
 
-    final_credit_count = sum(program[1] for program in program_list) - shared_credit_count
     print('Your final credit total comes out to {0}'.format(final_credit_count))
 
     print('Thank you for using this program!')
