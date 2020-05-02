@@ -11,7 +11,7 @@ PROGRAM_ADDITIONAL_COURSES = {'ERSPE1038': (2,'Two of (CSC422H5, CSC423H5, CSC42
                               'ERMAJ1540': (2, '1.0 credit from (STA310H5, STA312H5, STA313H5, STA314H5, STA315H5,'
                                                'STA348H5, STA413H5, STA431H5, STA437H5, STA441H5, STA457H5, CSC322H5,'
                                                'CSC411H5; MAT302H5, MAT311H5, MAT332H5, MAT334H5, MAT344H5,'
-                                               'MAT337H5/MAT378H5.')
+                                               'MAT337H5/MAT378H5.'),
                               'ERSPE1868': (2, "At least 1.0 credit from the following list of recommended courses,"
                                                "of which at least 0.5 must be at the 400-level: BIO315H5, BIO341H5,"
                                                " BIO370Y5, BIO371H5, BIO380H5, BIO443H5, BIO481Y5; CBJ481Y5; CHM361H5;"
