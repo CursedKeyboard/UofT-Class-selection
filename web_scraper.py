@@ -2,21 +2,25 @@ import requests
 from bs4 import BeautifulSoup, element
 from typing import Tuple, List
 
+#TODO use method to track credits where applicable instead of augmenting
 #TODO Add all courses
 #TODO look for a more efficient way to store this data
-PROGRAM_ADDITIONAL_COURSES = {'ERSPE1038': (2,'Two of (CSC422H5, CSC423H5, CSC427H5, CSC490H5)'),
-                              'ERSPE1688': (5, 'Five half courses from any 300/400 level U of T Mississauga '
-                                                    'CSC courses (including at least'
-                                                    '1.0 credit from 400-level courses).'),
-                              'ERMAJ1540': (2, '1.0 credit from (STA310H5, STA312H5, STA313H5, STA314H5, STA315H5,'
-                                               'STA348H5, STA413H5, STA431H5, STA437H5, STA441H5, STA457H5, CSC322H5,'
-                                               'CSC411H5; MAT302H5, MAT311H5, MAT332H5, MAT334H5, MAT344H5,'
-                                               'MAT337H5/MAT378H5.'),
-                              'ERSPE1868': (2, "At least 1.0 credit from the following list of recommended courses,"
-                                               "of which at least 0.5 must be at the 400-level: BIO315H5, BIO341H5,"
-                                               " BIO370Y5, BIO371H5, BIO380H5, BIO443H5, BIO481Y5; CBJ481Y5; CHM361H5;"
-                                               " CSC310H5, CSC338H5, CSC363H5; JCP410H5;"
-                                               " STA302H5/STA331H5,STA348H5, STA442H5")}
+PROGRAM_ADDITIONAL_COURSES = {'ERSPE1038': ['Two of (CSC422H5, CSC423H5, CSC427H5, CSC490H5)'],
+                              'ERSPE1688': ['Five half courses from any 300/400 level U of T Mississauga '
+                                            'CSC courses (including at least'
+                                            '1.0 credit from 400-level courses).'],
+                              'ERMAJ1540': ['1.0 credit from (STA310H5, STA312H5, STA313H5, STA314H5, STA315H5,'
+                                            'STA348H5, STA413H5, STA431H5, STA437H5, STA441H5, STA457H5, CSC322H5,'
+                                            'CSC411H5; MAT302H5, MAT311H5, MAT332H5, MAT334H5, MAT344H5,'
+                                            'MAT337H5/MAT378H5.'],
+                              'ERSPE1868': ["At least 1.0 credit from the following list of recommended courses,"
+                                            " of which at least 0.5 must be at the 400-level: BIO315H5, BIO341H5,"
+                                            " BIO370Y5, BIO371H5, BIO380H5, BIO443H5, BIO481Y5; CBJ481Y5; CHM361H5;"
+                                            " CSC310H5, CSC338H5, CSC363H5; JCP410H5;"
+                                            " STA302H5/STA331H5,STA348H5, STA442H5"],
+                              'ERMAJ1688': ["two of (CSC209H5, CSC258H5, CSC263H5)",
+                                            "Four half courses from any 300/400 level U of T Mississauga CSC"
+                                            " courses (including at least 0.5 credit from a 400-level course)."]}
 CREDIT_COURSE_CODE = {'H': 0.5, 'Y': 1.0}
 
 
@@ -36,6 +40,7 @@ def create_set_program(program_code: str) -> Tuple[set, int]:
 
     courses = set()
     credit_count = 0.0
+    non_parsable_count = 0
     for line in table_courses:
         line_text_neat = line.text.replace(';', ',').replace(' ', '')
         line_text_neat = replace_in_parenthesis(line_text_neat, ',', '^')
@@ -45,7 +50,9 @@ def create_set_program(program_code: str) -> Tuple[set, int]:
             if len(potential_course) == 8:
                 course_chosen = potential_course
             elif not potential_course[1].isupper():
-                break
+                additional_requirements(program_code=program_code, course_set=courses, curr_count=non_parsable_count)
+                non_parsable_count += 1
+                continue
             else:
                 print('=' * 20, 'Found choice based classes', sep='\n')
                 potential_course_enum = list(enumerate(potential_course.split('/')))
@@ -59,38 +66,31 @@ def create_set_program(program_code: str) -> Tuple[set, int]:
                     except TypeError:
                         print('You did not enter a proper value!')
             try:
-                credit_count = add_course(courses, course_chosen, credit_count)
+                add_course(courses, course_chosen)
             except ValueError:
                 print('I will ignore that addition')
 
     return courses, credit_count
 
 
-def add_course(course_set: set, course_chosen: str, credit_count: int) -> int:
-    """ Modifies course_set to include <course_chosen> and returns new credit count
+def add_course(course_set: set, course_chosen: str) -> None:
+    """ Modifies course_set to include <course_chosen>
 
     >>> cs = {}
-    >>> add_course(cs, 'CSC148H5', 0)
-    0.5
+    >>> add_course(cs, 'CSC148H5')
     >>> cs
     {'CSC148H5'}
     """
     chosen_course_multiple = course_chosen.split('^')
-    for course in chosen_course_multiple:
-        course = course.strip('()')
+    for course_in in chosen_course_multiple:
+        course_in = course_in.strip('()')
 
-        if course in course_set:
-            print('You have already added {0} to your list of courses!'.format(course))
+        if course_in in course_set:
+            print('You have already added {0} to your list of courses!'.format(course_in))
             raise ValueError
 
-        course_set.add(course)
-        try:
-            credit_count += CREDIT_COURSE_CODE[course_chosen[-2]]
-        except KeyError:
-            credit_count += CREDIT_COURSE_CODE[course_chosen[-3]]
-
-    return credit_count
-
+        course_set.add(course_in)
+        
 
 def replace_in_parenthesis(input_str: str, replace: str, replacement: str) -> str:
     """ Return a modified version of <input_str> such that all <replace> within parenthesis are replaced
@@ -123,21 +123,18 @@ def replace_in_parenthesis(input_str: str, replace: str, replacement: str) -> st
     return final_str
 
 
-def add_additional_courses(course_set: set, credit_count: int) -> int:
-    """ Adds user input courses to <course_set> and returns new credit count """
+def add_additional_courses(course_set: set) -> None:
+    """ Adds user input courses to <course_set> """
     user_input_course_count = input('How many courses would you like to add?')
-    current_credit_count = credit_count
 
     for i in range(int(user_input_course_count)):
         user_input_course_chosen = input('What is the course code for the course you want to add?')
         course_chosen = user_input_course_chosen.upper()
         try:
-            current_credit_count = add_course(course_set, course_chosen, current_credit_count)
-            print('You have added {0} and now have {1} credits'.format(course_chosen, current_credit_count))
+            add_course(course_set, course_chosen)
+            print('You have added {0} and now have {1} credits'.format(course_chosen, count_credits(course_set)))
         except ValueError:
             print('The last addition was cancelled')
-
-    return current_credit_count
 
 
 def create_program() -> Tuple[set, int]:
@@ -147,14 +144,11 @@ def create_program() -> Tuple[set, int]:
     program_code = input('Enter your program code')
 
     course_set, credit_count = create_set_program(program_code=program_code)
-    print('=' * 20)
-    print('Your program has additional requirements\n', PROGRAM_ADDITIONAL_COURSES[program_code][1], sep='')
-    credit_count = add_additional_courses(course_set, credit_count)
 
     user_input = input('Would you like to add more courses?')
 
     while user_input.lower() != 'no':
-        credit_count = add_additional_courses(course_set, credit_count)
+        add_additional_courses(course_set)
         user_input = input('Would you like to add more courses?')
 
     return course_set, credit_count
@@ -176,12 +170,18 @@ def count_credits(course_list: List[str]) -> int:
         print('Error within, please contact Saiem Irfan')
 
 
+def additional_requirements(program_code: str, course_set: set, curr_count: int) -> None:
+    """ Asks user to add courses based on any non-paresable html """
+    print('=' * 20)
+    print('Your program has additional requirements\n', PROGRAM_ADDITIONAL_COURSES[program_code][curr_count], sep='')
+    add_additional_courses(course_set)
+
 if __name__ == '__main__':
     user_program_choice = input('How many different programs would you like to take at the same time? (2)')
 
-    if int(user_program_choice) < 2 or int(user_program_choice) >= 5:
-        print('You must choose between 2 and 4 programs (inclusive)')
-        raise ValueError
+    # if int(user_program_choice) < 2 or int(user_program_choice) >= 5:
+    #     print('You must choose between 2 and 4 programs (inclusive)')
+    #     raise ValueError
 
     program_list = list()
     for i in range(int(user_program_choice)):
@@ -189,14 +189,15 @@ if __name__ == '__main__':
         program_list.append(create_program())
         print('='*40)
 
-    print('These are the courses which are similar between programs')
+    print('These are the different courses which you will need to take between all programs')
     unique_courses = set()
     for program_stats in program_list:
         for course in program_stats[0]:
             unique_courses.add(course)
 
-    final_credit_count = count_credits(list(common_courses))
-
+    final_credit_count = count_credits(list(unique_courses))
+    
+    print(unique_courses)
     print('Your final credit total comes out to {0}'.format(final_credit_count))
 
     print('Thank you for using this program!')
