@@ -83,12 +83,20 @@ def create_set_program(program_code: str) -> set:
 
 
 def add_course(course_set: set, course_chosen: str) -> None:
-    """ Modifies course_set to include <course_chosen>
+    """ Modifies <course_set> to include <course_chosen>
 
-    >>> cs = {}
-    >>> add_course(cs, 'CSC148H5')
-    >>> cs
-    {'CSC148H5'}
+    Args:
+        course_set: Set which will be modified
+        course_chosen: Course code which will be added to <course_set>
+
+    Examples:
+        >>> cs = {}
+        >>> add_course(cs, 'CSC148H5')
+        >>> cs
+        {'CSC148H5'}
+        >>> add_course(cs, 'CSC148H5')
+        >>> cs
+        {'CSC148H5'}
     """
     chosen_course_multiple = course_chosen.split('^')
     for course_in in chosen_course_multiple:
