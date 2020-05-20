@@ -36,6 +36,16 @@ def find_table_course(program_code: str) -> element.ResultSet:
 
 
 def create_set_program(program_code: str) -> Tuple[set, int]:
+    """ Returns a set object containing all courses which are available on <program_code>'s program on the UTM programs
+    website
+
+    Args:
+        program_code: The official code for a user inputted program
+
+    Returns:
+        Set containing all the required classes for this program. There may be places where a choice is warranted to the
+        user when class choice isn't singular
+    """
     table_courses = find_table_course(program_code)
 
     courses = set()
@@ -96,12 +106,25 @@ def replace_in_parenthesis(input_str: str, replace: str, replacement: str) -> st
     """ Return a modified version of <input_str> such that all <replace> within parenthesis are replaced
     with <replacement>
 
-    Precondition: Parenthesis are not nested more than once; len(replace) == 1; replace != '(' or ')'
+    Precondition: Parenthesis are not nested more than once
 
-    >>> replace_commas_in_parenthesis('((,))',",",'a')
-    ValueError
-    >>> replace_commas_in_parenthesis('(,)', ",", 'a')
-    '(a)'
+    Args:
+        input_str: The string to be modified on
+        replace: The character to replace within parenthesis
+        replacement: The character to replace with
+
+    Returns:
+        Modified version of <input_str> such that it follows guidelines set above
+
+    Raises:
+        ValueError: Length of <replace> > 1 (it's more than a character)
+        ValueError: <Replace> is either '(' or ')'
+
+    Examples:
+        >>> replace_commas_in_parenthesis('((,))',",",'a')
+        ValueError
+        >>> replace_commas_in_parenthesis('(,)', ",", 'a')
+        '(a)'
     """
     if len(replace) != 1 or replace == '(' or replace == ')':
         raise ValueError
@@ -124,7 +147,7 @@ def replace_in_parenthesis(input_str: str, replace: str, replacement: str) -> st
 
 
 def add_additional_courses(course_set: set) -> None:
-    """ Adds user input courses to <course_set> """
+    """ Takes user input to add courses to <course_set> """
     user_input_course_count = input('How many courses would you like to add?')
 
     for i in range(int(user_input_course_count)):
@@ -154,15 +177,23 @@ def create_program() -> Tuple[set, int]:
     return course_set, credit_count
 
 
-def count_credits(course_list: List[str]) -> int:
-    """ Count the number of credits in <course_list>
+def count_credits(course_set: set) -> int:
+    """ Return the number of credits in <course_set>
 
-    Precondition: all items in course list follow UOFT course code
+    Precondition: all items in course list follow UOFT course code (3 letter course code, 3 number course number, 1
+    letter credit count indicator, 1 number campus indicator)
 
-    >>> count_credits(['CSC148H5', 'CSC108H5'])
-    1.0
-    >>> count_credits(['MAT137Y5'])
-    1.0
+    Args:
+        course_set: set containing all courses to count towards credit total
+
+    Returns:
+        Sum of all credits for courses in <course_set>
+
+    Examples:
+        >>> count_credits(['CSC148H5', 'CSC108H5'])
+        1.0
+        >>> count_credits(['MAT137Y5'])
+        1.0
     """
     try:
         return sum(CREDIT_COURSE_CODE[course[-2]] for course in course_list)
@@ -195,7 +226,7 @@ if __name__ == '__main__':
         for course in program_stats[0]:
             unique_courses.add(course)
 
-    final_credit_count = count_credits(list(unique_courses))
+    final_credit_count = count_credits(unique_courses))
     
     print(unique_courses)
     print('Your final credit total comes out to {0}'.format(final_credit_count))
