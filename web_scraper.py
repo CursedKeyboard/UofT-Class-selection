@@ -35,7 +35,7 @@ def find_table_course(program_code: str) -> element.ResultSet:
     return table.find_all(width='80%')
 
 
-def create_set_program(program_code: str) -> Tuple[set, int]:
+def create_set_program(program_code: str) -> set:
     """ Returns a set object containing all courses which are available on <program_code>'s program on the UTM programs
     website
 
@@ -49,7 +49,6 @@ def create_set_program(program_code: str) -> Tuple[set, int]:
     table_courses = find_table_course(program_code)
 
     courses = set()
-    credit_count = 0.0
     non_parsable_count = 0
     for line in table_courses:
         line_text_neat = line.text.replace(';', ',').replace(' ', '')
@@ -80,7 +79,7 @@ def create_set_program(program_code: str) -> Tuple[set, int]:
             except ValueError:
                 print('I will ignore that addition')
 
-    return courses, credit_count
+    return courses
 
 
 def add_course(course_set: set, course_chosen: str) -> None:
@@ -160,13 +159,13 @@ def add_additional_courses(course_set: set) -> None:
             print('The last addition was cancelled')
 
 
-def create_program() -> Tuple[set, int]:
+def create_program() -> set:
     """ Creates a set with all of a programs required classes and additional ones user has added. Returns that program
     class set and the number of credits in that program
     """
     program_code = input('Enter your program code')
 
-    course_set, credit_count = create_set_program(program_code=program_code)
+    course_set = create_set_program(program_code=program_code)
 
     user_input = input('Would you like to add more courses?')
 
@@ -174,7 +173,7 @@ def create_program() -> Tuple[set, int]:
         add_additional_courses(course_set)
         user_input = input('Would you like to add more courses?')
 
-    return course_set, credit_count
+    return course_set
 
 
 def count_credits(course_set: set) -> int:
