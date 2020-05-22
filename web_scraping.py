@@ -32,7 +32,7 @@ def find_table_course(program_code: str) -> element.ResultSet:
 
 def get_program_description(program_code: str) -> str:
     """ Returns the official program description """
-    with open("program_to_description.csv", 'r') as file:
+    with open("data/program_to_description.csv", 'r') as file:
         for line in file:
             if line[:8] == program_code:
                 return line[9:]
@@ -52,8 +52,10 @@ def create_course(course_code: str) -> Optional[Course]:
         description = soup.find('span', class_="normaltext")
 
         if description.b is None:
-            title = soup.find('div', class_='centralpos').p.text[9:]
-            return Course(course_code, description.text, title)
+            data = soup.find('div', class_='centralpos').p.text
+            title = data[9:-5]
+            class_type = data[-4:-1]
+            return Course(course_code, description.text, title, class_type=class_type)
 
 
 if __name__ == '__main__':
