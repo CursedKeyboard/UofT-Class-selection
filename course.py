@@ -62,14 +62,13 @@ class Course:
 
 class Program:
 
-    def __init__(self, name: str, description: str) -> None:
-
-        self._name = str(name)
+    def __init__(self, code: str, description: str) -> None:
+        self._code = str(code)
         self._description = str(description)
         self._courses = list()
 
     def get_name(self) -> str:
-        return self._name
+        return self._code
 
     def add_course(self, course: Course) -> bool:
         if isinstance(course, Course):
@@ -85,3 +84,32 @@ class Program:
 
     def change_description(self, new_description: str) -> None:
         self._description = str(new_description)
+
+
+class User:
+
+    def __init__(self):
+        self._total_credits = 0.0
+        self._programs = list()
+        self._courses = set()
+
+    def add_program(self, program: Program):
+        for course in program.get_courses():
+            self._courses.add(course)
+
+        self._programs.append(program)
+
+    def get_programs(self):
+        return self._programs
+
+    def update_credits(self):
+        self._total_credits = sum(course.get_credit_count() for course in self._courses)
+
+    def get_credits(self):
+        return self._total_credits
+
+    def get_courses(self):
+        return self._courses
+
+    def get_active_courses(self):
+        return self._courses[-4:]
