@@ -68,21 +68,27 @@ class Program:
         self._courses = list()
 
     def get_name(self) -> str:
+        """ Returns program code """
         return self._code
 
     def add_course(self, course: Course) -> bool:
+        """ Adds a course to the program """
         if isinstance(course, Course):
             self._courses.append(course)
         else:
             raise TypeError("Argument <course> must be a Course object!")
 
     def get_courses(self) -> List[Course]:
+        """ Returns a list of courses added to this program """
         return self._courses
 
     def get_credit_count(self) -> float:
+        """ Returns the credit count for this program """
+        # Fix this, currently only counting number of courses
         return sum(course for course in self._courses)
 
     def change_description(self, new_description: str) -> None:
+        """ Changes the description of the program object """
         self._description = str(new_description)
 
 
@@ -95,25 +101,38 @@ class User:
         self._active_courses = []
 
     def add_program(self, program: Program):
+        """ Adds a program to the user object """
+        if len(self._programs) == 3:
+            raise ValueError("Cannot add more than 3 programs")
         self._programs.append(program)
 
     def get_programs(self):
+        """ Returns a list of the programs """
         return self._programs
 
-    def update_credits(self):
-        self._total_credits = sum(course.get_credit_count() for course in self._courses)
+    def _update_credits(self, course: Course):
+        """ Updates user credit count """
+        if course.get_course_code()[-2] == 'Y':
+            self._total_credits += 1.0
+        else:
+            self._total_credits += 0.5
 
-    def get_credits(self):
+    def get_credits(self) -> int:
+        """ Returns user credit count """
         return self._total_credits
 
     def get_courses(self):
+        """ Returns a set of user courses"""
         return self._courses
 
     def get_active_courses(self):
+        """ Returns a list of user's active courses """
         return self._active_courses
 
     def add_course(self, course: Course):
+        """ Adds course to user and updates active courses effectively """
         self._courses.add(course)
         if len(self._active_courses) == 4:
             self._active_courses.pop(0)
         self._active_courses.append(course)
+        self._update_credits(course)
