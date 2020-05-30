@@ -92,11 +92,9 @@ class User:
         self._total_credits = 0.0
         self._programs = list()
         self._courses = set()
+        self._active_courses = []
 
     def add_program(self, program: Program):
-        for course in program.get_courses():
-            self._courses.add(course)
-
         self._programs.append(program)
 
     def get_programs(self):
@@ -112,4 +110,10 @@ class User:
         return self._courses
 
     def get_active_courses(self):
-        return self._courses[-4:]
+        return self._active_courses
+
+    def add_course(self, course: Course):
+        self._courses.add(course)
+        if len(self._active_courses) == 4:
+            self._active_courses.pop(0)
+        self._active_courses.append(course)
