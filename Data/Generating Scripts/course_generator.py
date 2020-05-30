@@ -26,7 +26,7 @@ def generate_course_department_id(department_numbers: int = 60) -> dict:
     return subject_to_department
 
 
-def set_course_to_value(courses: element, d: dict, i: str):
+def set_course_to_value(courses: element, d: dict):
     for course in courses:
         subject_code = course.td.a.text[:3]
         depart_num = course.td.a['href'].split('&')[0]

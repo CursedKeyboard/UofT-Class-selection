@@ -1,7 +1,24 @@
 import requests
 from bs4 import BeautifulSoup, element
-from course import Course
-from typing import Optional
+from course import Course, Program, User
+from typing import Optional, Union, Tuple, List
+import utils
+from gui import gui_popups
+from gui.gui_interact import update_middle_segment, update_active_courses_footer
+
+SPECIAL_MESSAGES = {'ERSPE1038': ['Two of (CSC422H5, CSC423H5, CSC427H5, CSC490H5)'],
+                    'ERSPE1688': ['Five half courses from any 300/400 level U of T Mississauga '
+                                  'CSC courses (including at least 1.0 credit from 400-level courses).'],
+                    'ERMAJ1540': ['1.0 credit from (STA310H5, STA312H5, STA313H5, STA314H5, STA315H5, '
+                                  'STA348H5, STA413H5, STA431H5, STA437H5, STA441H5, STA457H5, CSC322H5, '
+                                  'CSC411H5; MAT302H5, MAT311H5, MAT332H5, MAT334H5, MAT344H5, MAT337H5/MAT378H5.'],
+                    'ERSPE1868': ["At least 1.0 credit from the following list of recommended courses, "
+                                  "of which at least 0.5 must be at the 400-level: BIO315H5, BIO341H5, "
+                                  "BIO370Y5, BIO371H5, BIO380H5, BIO443H5, BIO481Y5; CBJ481Y5; CHM361H5; "
+                                  "CSC310H5, CSC338H5, CSC363H5; JCP410H5; STA302H5/STA331H5,STA348H5, STA442H5"],
+                    'ERMAJ1688': ["two of (CSC209H5, CSC258H5, CSC263H5)",
+                                  "Four half courses from any 300/400 level U of T Mississauga CSC "
+                                  "courses (including at least 0.5 credit from a 400-level course)."]}
 
 
 def create_subject_to_department_number_dict() -> dict:
@@ -50,7 +67,6 @@ def create_course(course_code: str) -> Optional[Course]:
         soup = BeautifulSoup(course_page_source, 'lxml')
 
         description = soup.find('span', class_="normaltext")
-
         if description.b is None:
             data = soup.find('div', class_='centralpos').p.text
             title = data[9:-5]
@@ -58,6 +74,103 @@ def create_course(course_code: str) -> Optional[Course]:
             return Course(course_code, description.text, title, class_type=class_type)
 
 
+def create_program(program_code: str, user: User, applet) -> Program:
+    """ Returns a Program object containing all courses which are available on <program_code>'s program on the UTM
+    programs website
+
+    Args:
+        program_code: The official code for a user inputted program
+
+    Returns:
+        Set containing all the required classes for this program. There may be places where a choice is warranted to the
+        user when class choice isn't singular
+    """
+    program = Program(code=program_code, description='Test')
+    table_courses = find_table_course(program_code)
+
+    for line in table_courses:
+        line_text_neat = line.text.replace(';', ',').replace(' ', '')
+        line_text_neat = utils.replace_in_parenthesis(line_text_neat, ',', '^')
+        line_text_neat = line_text_neat.split(',')
+
+        num_errors = 0
+        for potential_course in line_text_neat:
+            update = True
+            check_potential_course = sdf(potential_course)
+            if isinstance(check_potential_course, str):
+                course = create_course(check_potential_course)
+                program.add_course(course=course)
+                user.add_course(course)
+                update_middle_segment(user=user, course=course, applet=applet)
+            elif isinstance(check_potential_course, int):
+                update = False
+                pass_special_message(program_code, num_errors)
+            else:
+                # take_user_input(check_potential_course)
+                courses_added = add_user_input(program=program, potential_courses=check_potential_course,
+                                               course_list=[])
+                for course in courses_added:
+                    user.add_course(course)
+                    update_middle_segment(user=user, course=course, applet=applet)
+            if update:
+                update_active_courses_footer(user=user, applet=applet)
+    return program
+
+
+def sdf(potential_course: str) -> Union[str, int, List[Tuple[int, str]]]:
+    if len(potential_course) == 8:
+        return potential_course
+    elif not potential_course[1].isupper():
+        return -1
+    else:
+        return list(enumerate(potential_course.split('/')))
+
+
+def pass_special_message(program_code: str, num: int):
+    gui_popups.special_message(message=SPECIAL_MESSAGES[program_code][num])
+
+
+def get_user_input(potential_courses: List[Tuple[int, str]]):
+    courses = gui_popups.take_user_input(choices=potential_courses)
+    return courses
+
+
+def add_user_input(program: Program, potential_courses: List[Tuple[int, str]], course_list=[]) -> List[Course]:
+    courses = get_user_input(potential_courses)
+    chosen_course_multiple = courses[0].split('^')
+    for course in chosen_course_multiple:
+        course = course.replace('(', '').replace(')', '')
+        add_course = True
+        for courses_had in program.get_courses():
+            if courses_had.get_course_code() == course:
+                gui_popups.popup_duplicate_course(course)
+                add_course = False
+        if add_course:
+            course_obj = create_course(course)
+            try:
+                program.add_course(course_obj)
+                course_list.append(course_obj)
+            # This error checks to make sure that the course exists because sometimes it doesn't but is left in
+            except TypeError:
+                gui_popups.course_not_found_popup(course_name=course)
+                add_user_input(program, potential_courses, course_list)
+
+    return course_list
+
+
+def add_custom_course(course: str, user: User, applet) -> None:
+    for course_added in user.get_courses():
+        if course_added.get_course_code() == course:
+            gui_popups.popup_duplicate_course(course)
+            return
+
+    course = create_course(course)
+    user.add_course(course)
+    update_middle_segment(course=course, user=user, applet=applet)
+    update_active_courses_footer(user=user, applet=applet)
+
+
 if __name__ == '__main__':
-    c = create_course('CSC148H5')
-    print(c.get_desc())
+    # c = create_course('CSC148H5')
+    # print(c.get_desc())
+    create_program('ERSPE1038')
