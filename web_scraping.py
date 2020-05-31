@@ -4,7 +4,7 @@ from course import Course, Program, User
 from typing import Optional, Union, Tuple, List
 import utils
 from gui import gui_popups
-from gui.gui_interact import update_middle_segment, update_active_courses_footer
+from gui.gui_interact import update_middle_segment, update_active_courses_footer, MainFrames
 
 SPECIAL_MESSAGES = {'ERSPE1038': ['Two of (CSC422H5, CSC423H5, CSC427H5, CSC490H5)'],
                     'ERSPE1688': ['Five half courses from any 300/400 level U of T Mississauga '
@@ -74,16 +74,17 @@ def create_course(course_code: str) -> Optional[Course]:
             return Course(course_code, description.text, title, class_type=class_type)
 
 
-def create_program(program_code: str, user: User, applet) -> Program:
+def create_program(program_code: str, user: User, applet: MainFrames) -> Program:
     """ Returns a Program object containing all courses which are available on <program_code>'s program on the UTM
     programs website
 
     Args:
         program_code: The official code for a user inputted program
+        user: The user which will have courses from program and eventually program added to
+        applet: The applet which will be updated
 
     Returns:
-        Set containing all the required classes for this program. There may be places where a choice is warranted to the
-        user when class choice isn't singular
+        Program object corresponding to program_code and optional classes which user chooses
     """
     program = Program(code=program_code, description='Test')
     table_courses = find_table_course(program_code)
@@ -102,6 +103,8 @@ def create_program(program_code: str, user: User, applet) -> Program:
                 program.add_course(course=course)
                 user.add_course(course)
                 update_middle_segment(user=user, course=course, applet=applet)
+                applet.get_mid().update()
+                applet.get_footer().update()
             elif isinstance(check_potential_course, int):
                 update = False
                 pass_special_message(program_code, num_errors)
