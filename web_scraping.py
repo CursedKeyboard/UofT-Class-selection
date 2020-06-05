@@ -1,10 +1,9 @@
 import requests
 from bs4 import BeautifulSoup, element
-from course import Course, Program, User
+from course import Course, Program
 from typing import Optional, Union, Tuple, List
 import utils
 from gui import gui_popups
-from gui.gui_interact import update_middle_segment, update_active_courses_footer, MainFrames
 
 SPECIAL_MESSAGES = {'ERSPE1038': ['Two of (CSC422H5, CSC423H5, CSC427H5, CSC490H5)'],
                     'ERSPE1688': ['Five half courses from any 300/400 level U of T Mississauga '
@@ -74,7 +73,7 @@ def create_course(course_code: str) -> Optional[Course]:
             return Course(course_code, description.text, title, class_type=class_type)
 
 
-def create_program(program_code: str, user: User, applet: MainFrames) -> Program:
+def create_program(program_code: str, applet) -> Program:
     """ Returns a Program object containing all courses which are available on <program_code>'s program on the UTM
     programs website
 
@@ -86,6 +85,7 @@ def create_program(program_code: str, user: User, applet: MainFrames) -> Program
     Returns:
         Program object corresponding to program_code and optional classes which user chooses
     """
+    user = applet.user
     program = Program(code=program_code, description='Test')
     table_courses = find_table_course(program_code)
 
@@ -100,11 +100,13 @@ def create_program(program_code: str, user: User, applet: MainFrames) -> Program
             check_potential_course = sdf(potential_course)
             if isinstance(check_potential_course, str):
                 course = create_course(check_potential_course)
+
                 program.add_course(course=course)
                 user.add_course(course)
-                update_middle_segment(user=user, course=course, applet=applet)
-                applet.get_mid().update()
-                applet.get_footer().update()
+
+                applet.update_middle_segment(course=course)
+                applet.mid.update()
+                applet.bottom.update()
             elif isinstance(check_potential_course, int):
                 update = False
                 pass_special_message(program_code, num_errors)
@@ -114,9 +116,10 @@ def create_program(program_code: str, user: User, applet: MainFrames) -> Program
                                                course_list=[])
                 for course in courses_added:
                     user.add_course(course)
-                    update_middle_segment(user=user, course=course, applet=applet)
+                    applet.update_middle_segment(course=course)
+
             if update:
-                update_active_courses_footer(user=user, applet=applet)
+                applet.update_active_courses_footer()
     return program
 
 
@@ -161,7 +164,8 @@ def add_user_input(program: Program, potential_courses: List[Tuple[int, str]], c
     return course_list
 
 
-def add_custom_course(course: str, user: User, applet) -> None:
+def add_custom_course(course: str, applet) -> None:
+    user = applet.user
     for course_added in user.get_courses():
         if course_added.get_course_code() == course:
             gui_popups.popup_duplicate_course(course)
@@ -169,8 +173,8 @@ def add_custom_course(course: str, user: User, applet) -> None:
 
     course = create_course(course)
     user.add_course(course)
-    update_middle_segment(course=course, user=user, applet=applet)
-    update_active_courses_footer(user=user, applet=applet)
+    applet.update_middle_segment(course=course)
+    applet.update_active_courses_footer()
 
 
 if __name__ == '__main__':
