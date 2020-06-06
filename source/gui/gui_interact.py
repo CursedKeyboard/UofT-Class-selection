@@ -2,10 +2,10 @@ from __future__ import annotations
 from tkinter import Tk
 from tkinter.ttk import Frame
 import tkinter as tk
-from course import Course, Program, User
+from source.course import Course, Program, User
 from typing import List
-import gui.gui_popups as gui_pop
-import web_scraping
+import source.gui.gui_popups as gui_pop
+from source import web_scraping
 
 
 class CourseFrame(Frame):
@@ -138,7 +138,6 @@ class Applet:
         self._set_frames_bottom()
         self._set_header()
 
-        input('hola')
         self._root.mainloop()
 
     def _create_basic_frames(self, parent: tk.Tk) -> None:

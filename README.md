@@ -1,4 +1,4 @@
-# jubilant-train
+# UofT-Class-selection
 This is a project which tries to improve the University of Toronto Mississauga course and program decision process
 ## Installation
 Currently you can only install the git repository but efforts are being made to include a pypi

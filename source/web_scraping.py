@@ -1,9 +1,9 @@
 import requests
 from bs4 import BeautifulSoup, element
-from course import Course, Program
+from source.course import Course, Program
 from typing import Optional, Union, Tuple, List
-import utils
-from gui import gui_popups
+from source import utils
+from source.gui import gui_popups
 
 SPECIAL_MESSAGES = {'ERSPE1038': ['Two of (CSC422H5, CSC423H5, CSC427H5, CSC490H5)'],
                     'ERSPE1688': ['Five half courses from any 300/400 level U of T Mississauga '
@@ -23,7 +23,7 @@ SPECIAL_MESSAGES = {'ERSPE1038': ['Two of (CSC422H5, CSC423H5, CSC427H5, CSC490H
 def create_subject_to_department_number_dict() -> dict:
     """ Create a dictionary which maps subjects to department numbers """
     final_dict = {}
-    with open('Data/subject_to_dep_num.txt', 'r') as file:
+    with open('../Data/subject_to_dep_num.txt', 'r') as file:
         for line in file:
             line = line.split(',')
             subject = line[0]

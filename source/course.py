@@ -98,7 +98,7 @@ class User:
         self._total_credits = 0.0
         self._programs = list()
         self._courses = set()
-        self._active_courses = []
+        self._active_courses = list()
 
     def add_program(self, program: Program):
         """ Adds a program to the user object """
