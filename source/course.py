@@ -111,13 +111,13 @@ class User:
         return self._programs
 
     def _update_credits(self, course: Course):
-        """ Updates user credit count """
+        """ Updates user credit count by adding credits from <course> upon successful completion"""
         if course.get_course_code()[-2] == 'Y':
             self._total_credits += 1.0
         else:
             self._total_credits += 0.5
 
-    def get_credits(self) -> int:
+    def get_credits(self) -> float:
         """ Returns user credit count """
         return self._total_credits
 
