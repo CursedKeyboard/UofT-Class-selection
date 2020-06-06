@@ -2,10 +2,10 @@ from __future__ import annotations
 from tkinter import Tk
 from tkinter.ttk import Frame
 import tkinter as tk
-from source.course import Course, Program, User
+from course import Course, Program, User
 from typing import List
-import source.gui.gui_popups as gui_pop
-from source import web_scraping
+import gui.gui_popups as gui_pop
+import web_scraping
 
 
 class CourseFrame(Frame):

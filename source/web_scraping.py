@@ -1,9 +1,9 @@
 import requests
 from bs4 import BeautifulSoup, element
-from source.course import Course, Program
+from course import Course, Program
 from typing import Optional, Union, Tuple, List
-from source import utils
-from source.gui import gui_popups
+import utils
+from gui import gui_popups
 
 SPECIAL_MESSAGES = {'ERSPE1038': ['Two of (CSC422H5, CSC423H5, CSC427H5, CSC490H5)'],
                     'ERSPE1688': ['Five half courses from any 300/400 level U of T Mississauga '
