@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup, element
+import json
 
 
 def generate_course_department_id(department_numbers: int = 60) -> dict:
@@ -17,32 +18,37 @@ def generate_course_department_id(department_numbers: int = 60) -> dict:
         courses_table = soup.find('table')
 
         # Handle Non existent departments like department 35
+        # If it does exist set values up
         try:
             courses_table['style']
         except KeyError:
             courses = courses_table.find_all('tr')
-            set_course_to_value(courses, subject_to_department, str(i))
+            set_course_to_value(courses, subject_to_department)
 
     return subject_to_department
 
 
-def set_course_to_value(courses: element, d: dict):
+def set_course_to_value(courses: element, d: dict) -> None:
+    """ Set up course code to department number by parsing through the department number courses """
     for course in courses:
         subject_code = course.td.a.text[:3]
         depart_num = course.td.a['href'].split('&')[0]
         depart_num = depart_num[depart_num.rfind('=') + 1:]
 
         if subject_code not in d:
-            d[subject_code] = {depart_num}
+            d[subject_code] = [depart_num]
+        elif depart_num in d[subject_code]:
+            pass
         else:
-            d[subject_code].add(depart_num)
+            d[subject_code].append(depart_num)
 
 
 if __name__ == '__main__':
     subject_to_department = generate_course_department_id()
     with open('../subject_to_dep_num.txt', 'w') as file:
-        for subject in subject_to_department:
-            file.write(subject)
-            for num in subject_to_department[subject]:
-                file.write(',' + num)
-            file.write('\n')
+        file.write(json.dumps(subject_to_department))
+        # for subject in subject_to_department:
+        #     file.write(subject)
+        #     for num in subject_to_department[subject]:
+        #         file.write(',' + num)
+        #     file.write('\n')

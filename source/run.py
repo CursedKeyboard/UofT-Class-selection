@@ -1,5 +1,5 @@
-from course import User
-from gui import gui_interact
+from source.course import User
+from source.gui import gui_interact
 
 u = User()
 applet = gui_interact.Applet(u)

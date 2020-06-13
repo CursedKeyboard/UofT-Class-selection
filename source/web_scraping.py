@@ -1,9 +1,12 @@
+import os
+import json
 import requests
 from bs4 import BeautifulSoup, element
-from course import Course, Program
 from typing import Optional, Union, Tuple, List
-import utils
-from gui import gui_popups
+
+from source.course import Course, Program
+from source import utils
+from source.gui import gui_popups
 
 SPECIAL_MESSAGES = {'ERSPE1038': ['Two of (CSC422H5, CSC423H5, CSC427H5, CSC490H5)'],
                     'ERSPE1688': ['Five half courses from any 300/400 level U of T Mississauga '
@@ -21,15 +24,10 @@ SPECIAL_MESSAGES = {'ERSPE1038': ['Two of (CSC422H5, CSC423H5, CSC427H5, CSC490H
 
 
 def create_subject_to_department_number_dict() -> dict:
-    """ Create a dictionary which maps subjects to department numbers """
-    final_dict = {}
-    with open('../Data/subject_to_dep_num.txt', 'r') as file:
-        for line in file:
-            line = line.split(',')
-            subject = line[0]
-            final_dict[subject] = [num.strip() for num in line[1:]]
-
-    return final_dict
+    """ Return a pre-made dictionary which maps subjects to department numbers """
+    with open(os.path.dirname(__file__)[:-6] + 'Data/subject_to_dep_num.txt', 'r') as file:
+        x = file.readline()
+    return json.loads(x)
 
 
 SUBJECT_TO_DEPARTMENT_NUMBER = create_subject_to_department_number_dict()
@@ -180,4 +178,5 @@ def add_custom_course(course: str, applet) -> None:
 if __name__ == '__main__':
     # c = create_course('CSC148H5')
     # print(c.get_desc())
-    create_program('ERSPE1038')
+    # create_program('ERSPE1038')
+    print('hi')

@@ -1,5 +1,3 @@
-from tkinter import Tk
-from tkinter.ttk import Frame
 import tkinter as tk
 from typing import List, Tuple
 from functools import partial
