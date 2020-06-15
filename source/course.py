@@ -9,11 +9,11 @@ class Course:
         Follows UofT course code standard
     """
     # === Private Attributes ===
-    # code:
+    # _code:
     #     Course code
-    # description:
+    # _description:
     #     Description for this course
-    # name:
+    # _name:
     #     Name for this course
 
     def __init__(self, code: str, description: str, name: str, class_type: str) -> None:
@@ -61,6 +61,14 @@ class Course:
 
 
 class Program:
+    """ An object representation of a UoFT program """
+    # === Private Attributes ===
+    # _code:
+    #       Program code
+    # _description:
+    #       Program description
+    # _courses:
+    #       List of courses in program. They are not concrete and therefore initialize empty
 
     def __init__(self, code: str, description: str) -> None:
         self._code = str(code)
@@ -84,8 +92,7 @@ class Program:
 
     def get_credit_count(self) -> float:
         """ Returns the credit count for this program """
-        # Fix this, currently only counting number of courses
-        return sum(course for course in self._courses)
+        return sum(course.get_credit_count() for course in self._courses)
 
     def change_description(self, new_description: str) -> None:
         """ Changes the description of the program object """
@@ -93,6 +100,17 @@ class Program:
 
 
 class User:
+    """ A User class which holds multiple programs and courses """
+    # === Private Attributes
+    # _programs:
+    #       A list of programs attached to the User
+    # _courses:
+    #       A set of courses attached to the User
+    # _active_courses:
+    #       A list of up to 4 of the most recently added courses. Courses which are clicked on in the gui
+    # may also be added here
+    # _total_credits:
+    #       A float representation of the total number of credits that all of the User's courses sum up to
 
     def __init__(self):
         self._total_credits = 0.0
