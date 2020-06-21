@@ -1,8 +1,6 @@
 """Tests for user class"""
 
-import os
 import unittest
-print(os.path.dirname(__file__))
 from source.course import User
 
 
