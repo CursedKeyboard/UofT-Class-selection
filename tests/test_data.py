@@ -11,3 +11,7 @@ class TestWebScraping(unittest.TestCase):
     def test_subject_to_dep_num(self):
         assert(subject_generator.generate_course_department_id() ==
                web.create_subject_to_department_number_dict())
+
+
+if __name__ == '__main__':
+    unittest.main()
