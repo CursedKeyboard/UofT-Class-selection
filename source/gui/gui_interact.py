@@ -125,7 +125,7 @@ class Applet:
         self.user = user
         self._create_basic_app()
 
-    def _create_basic_app(self) -> tuple:
+    def _create_basic_app(self) -> None:
         """ Create basic field where everything will be"""
         root = Tk()
         root.geometry("1080x720+0+0")
@@ -152,7 +152,6 @@ class Applet:
         for item in f:
             item.grid_propagate(0)
 
-        #TODO is the in_ needed?
         header.grid(column=0, row=0)
         unnamed.grid(column=0, row=1)
         bottom.grid(column=0, row=2)

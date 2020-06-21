@@ -13,7 +13,7 @@ def popup_duplicate_program():
     continue_button.pack(fill='x')
 
 
-def take_user_input(choices: List[Tuple[int, str]]) -> str:
+def take_user_input(choices: List[Tuple[int, str]]) -> list:
     user_input_window = tk.Toplevel()
     label = tk.Label(master=user_input_window, text="Choose one of the following choices!")
     label.grid()

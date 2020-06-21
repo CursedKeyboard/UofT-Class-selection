@@ -33,8 +33,19 @@ def create_subject_to_department_number_dict() -> dict:
 SUBJECT_TO_DEPARTMENT_NUMBER = create_subject_to_department_number_dict()
 
 
+# TODO: Make an option for invalid input
 def find_table_course(program_code: str) -> element.ResultSet:
-    """ Return the bs4 tag which holds all html info about courses """
+    """ Return the bs4 tag which holds all html info about courses
+
+    Args:
+        program_code: Program code for the Program intended course info is required
+
+    Precondition:
+        <program_code> is a valid UoFT program
+
+    Returns:
+         bs4 tag which holds all html info about the courses for intended program
+    """
     default_gateway = 'http://student.utm.utoronto.ca/calendar/program_detail.pl'
     program_query = {'Program': program_code}
     program_page_source = requests.get(default_gateway, params=program_query).text
@@ -43,18 +54,26 @@ def find_table_course(program_code: str) -> element.ResultSet:
     table = soup.find('table', class_='tab_adm')
     return table.find_all(width='80%')
 
-
-def get_program_description(program_code: str) -> str:
-    """ Returns the official program description """
-    with open("data/program_to_description.csv", 'r') as file:
-        for line in file:
-            if line[:8] == program_code:
-                return line[9:]
-
-    raise ValueError("Program Code not found!")
+# TODO create this function
+# def get_program_description(program_code: str) -> str:
+#     """ Returns the official program description """
+#     with open("data/program_to_description.csv", 'r') as file:
+#         for line in file:
+#             if line[:8] == program_code:
+#                 return line[9:]
+#
+#     raise ValueError("Program Code not found!")
 
 
 def create_course(course_code: str) -> Optional[Course]:
+    """ Creates a course object given <course_code>. If it is an invalid course, None is returned
+
+    Args:
+        course_code: The official code for the course that will be created
+
+    Returns:
+        Course object corresponding to the input, <course_code>. Includes descriptions and tags
+    """
     base_url = "http://student.utm.utoronto.ca/calendar/course_detail.pl"
 
     for department_numbers in SUBJECT_TO_DEPARTMENT_NUMBER[course_code[:3]]:
@@ -71,14 +90,14 @@ def create_course(course_code: str) -> Optional[Course]:
             return Course(course_code, description.text, title, class_type=class_type)
 
 
+# TODO: Set program descriptions
 def create_program(program_code: str, applet) -> Program:
     """ Returns a Program object containing all courses which are available on <program_code>'s program on the UTM
     programs website
 
     Args:
         program_code: The official code for a user inputted program
-        user: The user which will have courses from program and eventually program added to
-        applet: The applet which will be updated
+        applet: The applet which will be updated and interacted with
 
     Returns:
         Program object corresponding to program_code and optional classes which user chooses
@@ -131,10 +150,28 @@ def sdf(potential_course: str) -> Union[str, int, List[Tuple[int, str]]]:
 
 
 def pass_special_message(program_code: str, num: int):
+    """ Passes a special message for program with code <program_code> and <num> previous special messages. Intended use
+    for un-parsable course selections in a program.
+
+    Args:
+        program_code: The program code for the program for which the special message is being passed
+        num: The number of special messages this program has all ready passed for <program_code>
+
+    Returns:
+        None
+    """
     gui_popups.special_message(message=SPECIAL_MESSAGES[program_code][num])
 
 
-def get_user_input(potential_courses: List[Tuple[int, str]]):
+def get_user_input(potential_courses: List[Tuple[int, str]]) -> list:
+    """ Takes user input from a list of enumerated course codes
+
+    Args:
+        potential_courses: A list of enumerated course codes
+
+    Returns:
+        List of course codes which have been chosen
+    """
     courses = gui_popups.take_user_input(choices=potential_courses)
     return courses
 
@@ -162,17 +199,31 @@ def add_user_input(program: Program, potential_courses: List[Tuple[int, str]], c
     return course_list
 
 
-def add_custom_course(course: str, applet) -> None:
+def add_custom_course(course: str, applet) -> bool:
+    """ Adds <course> to the applet's current user, independent of any programs
+
+    Args:
+        course: Course code for the course which will be added
+        applet: The applet on which the user's courses is modified
+
+    Returns:
+        True if course successfully added, false otherwise
+    """
     user = applet.user
     for course_added in user.get_courses():
         if course_added.get_course_code() == course:
             gui_popups.popup_duplicate_course(course)
-            return
+            return False
 
     course = create_course(course)
+    if course is None:
+        return False
+
     user.add_course(course)
     applet.update_middle_segment(course=course)
     applet.update_active_courses_footer()
+
+    return True
 
 
 if __name__ == '__main__':
