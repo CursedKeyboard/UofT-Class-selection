@@ -43,12 +43,11 @@ def set_course_to_value(courses: element, d: dict) -> None:
             d[subject_code].append(depart_num)
 
 
-if __name__ == '__main__':
+def write_subject_to_department():
     subject_to_department = generate_course_department_id()
     with open('../subject_to_dep_num.txt', 'w') as file:
         file.write(json.dumps(subject_to_department))
-        # for subject in subject_to_department:
-        #     file.write(subject)
-        #     for num in subject_to_department[subject]:
-        #         file.write(',' + num)
-        #     file.write('\n')
+
+
+if __name__ == '__main__':
+    write_subject_to_department()
