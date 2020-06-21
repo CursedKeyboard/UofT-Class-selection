@@ -1,6 +1,7 @@
 """Tests for user class"""
 
 import unittest
+
 from source.course import User
 
 

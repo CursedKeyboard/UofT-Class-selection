@@ -9,6 +9,4 @@ install:
     - pip install -r requirements.txt
 
 script:
-    - python Data/generating_scripts/course_generator.py
-    - python -m unittest tests/test_data.py -v
-    - python -m unittest tests/test_user.py -v
+    - python -m unittest discover tests
